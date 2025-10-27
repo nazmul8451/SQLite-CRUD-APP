@@ -12,6 +12,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        checkboxTheme:CheckboxThemeData(
+          shape: const CircleBorder(), // ✅ Circle shape
+      side: const BorderSide(color: Colors.purpleAccent),)
+      ),
       debugShowCheckedModeBanner: false,
       home: HomeScreen(),
     );

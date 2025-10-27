@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sqlite_crud_project/data/database_helper.dart';
 
@@ -45,24 +46,40 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Task'),
+          backgroundColor: const Color(0xFF1C002E),
+          title: const Text(
+            'Add Task',
+            style: TextStyle(color: Colors.white),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
                   labelText: 'Title',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: desController,
                 maxLines: 4,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
                   labelText: 'Description',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ],
@@ -70,14 +87,17 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purpleAccent,
+              ),
               onPressed: () async {
                 await addTask();
                 Navigator.pop(context);
               },
-              child: const Text('Add'),
+              child:  Text('Add',style: TextStyle(color: Colors.black),),
             ),
           ],
         );
@@ -88,83 +108,196 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Center(
+          child: Text(
+            'My Todo',
+            style: TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.purpleAccent,
         onPressed: showAddDialog,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Hello, Rimon Islam',
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            ),
-            const Text(
-              'Good Evening',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: tasks.isEmpty
-                  ? const Center(
-                child: Text(
-                  'No Notes yet!',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  bool isCompleted = task['isComplete'] == 1;
-                  return Card(
-                    color: Colors.black12,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Colors.grey),
-                    ),
-                    child: ListTile(
-                      leading: Checkbox(
-                        value: isCompleted,
-                        onChanged: (value) async {
-                          await DB_Helper.updateTaskStatus(
-                            task['id'],
-                            value! ? 1 : 0,
-                          );
-                          loadTask();
-                        },
-                      ),
-                      title: Text(
-                        task['title'],
-                        style: TextStyle(
-                          color: Colors.white,
-                          decoration: isCompleted
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                        ),
-                      ),
-                      subtitle: Text(
-                        task['description'],
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          await DB_Helper.deleteTask(task['id']);
-                          loadTask();
-                        },
-                      ),
-                    ),
-                  );
-                },
+      body: Stack(
+        children: [
+          // Background Gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0D001F),
+                  Color(0xFF210050),
+                  Color(0xFF1B0034),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // 💜 Glow Circles
+          Positioned(
+            top: -60,
+            left: -30,
+            child: Container(
+              height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.purpleAccent.withOpacity(0.4),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 80,
+            right: -40,
+            child: Container(
+              height: 180,
+              width: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.blueAccent.withOpacity(0.3),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          //Optional blur overlay for smoothness
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(color: Colors.transparent),
+          ),
+
+          // Main content
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                  const EdgeInsets.only(left: 20, right: 20, top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:  [
+                      RichText(
+                        text: TextSpan(
+                          text: 'Hello, ',
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: 'Rimon Islam',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.purpleAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Good Night 🌙',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Expanded(
+                  child: tasks.isEmpty
+                      ? const Center(
+                    child:
+                    CircularProgressIndicator(color: Colors.white),
+                  )
+                      : ListView.builder(
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = tasks[index];
+                      bool isCompleted = task['isComplete'] == 1;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 6),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Colors.white12,
+                            ),
+                          ),
+                          child: ListTile(
+                            leading: Checkbox(
+                              activeColor: Colors.purpleAccent,
+                              value: isCompleted,
+                              onChanged: (value) async {
+                                await DB_Helper.updateTaskStatus(
+                                  task['id'],
+                                  value! ? 1 : 0,
+                                );
+                                loadTask();
+                              },
+                            ),
+                            title: Text(
+                              task['title'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                decoration: isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                            subtitle: Text(
+                              task['description'],
+                              style:
+                              const TextStyle(color: Colors.white70),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () async {
+                                await DB_Helper.deleteTask(task['id']);
+                                loadTask();
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

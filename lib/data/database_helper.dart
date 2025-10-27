@@ -3,6 +3,8 @@ import 'package:sqflite/sqflite.dart';
 
 class DB_Helper {
   static Database? _db;
+
+  //Database create
   static Future<Database> initDB() async {
     final path = join(await getDatabasesPath(), 'todo.db');
     print('Database path: $path');
@@ -10,26 +12,25 @@ class DB_Helper {
       path,
       version: 1,
       onCreate: (db, version) async {
-        print('Database Created');
         await db.execute('''
       CREATE TABLE task(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         description TEXT,
-        isComplete INTEGERw
+        isComplete INTEGER
       )
       ''');
       },
     );
   }
 
-
+// database access korteci
   static Future<Database> get database async {
     _db ??= await initDB();
     return _db!;
   }
 
-  //  Insert
+  //  Insert kora hoy insert diye
   static Future<int> taskInsert(Map<String, dynamic> task) async {
     final db = await database;
     int result = await db.insert("task", task);
@@ -37,7 +38,7 @@ class DB_Helper {
     return result;
   }
 
-  //  Read
+  //  Read kora hoye query diye
   static Future<List<Map<String, dynamic>>> getAllTasks() async {
     final db = await database;
     final data = await db.query('task');
