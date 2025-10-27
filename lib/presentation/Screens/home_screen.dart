@@ -11,171 +11,152 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController desController = TextEditingController();
-
   List<Map<String, dynamic>> tasks = [];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadTask();
   }
 
-  Future<void> loadTask()async{
+  Future<void> loadTask() async {
     tasks = await DB_Helper.getAllTasks();
     setState(() {});
   }
-  //add task function
+
   Future<void> addTask() async {
     String title = titleController.text.trim();
     String description = desController.text.trim();
+
     if (title.isNotEmpty && description.isNotEmpty) {
       await DB_Helper.taskInsert({
         'title': title,
         'description': description,
         'isComplete': 0,
       });
+      await loadTask();
       titleController.clear();
       desController.clear();
-      loadTask();
     }
   }
 
-
-  @override
-  Widget build(BuildContext context) {
-    void onTapAlertDialoge() {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Add Todo'),
-            backgroundColor: Colors.white,
-            content: Form(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  TextFormField(
-                    controller: desController,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w300,
-                  ),
+  void showAddDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              GestureDetector(
-                onTap: (){
-                  addTask();
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  height: 30,
-                  width: 70,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Add',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: desController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
                 ),
               ),
             ],
-          );
-        },
-      );
-    }
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await addTask();
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        onPressed: showAddDialog,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Hello,Rimon islam',
-              style: TextStyle(
-                fontSize: 25,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+            const Text(
+              'Hello, Rimon Islam',
+              style: TextStyle(color: Colors.white, fontSize: 24),
             ),
-            Text(
+            const Text(
               'Good Evening',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
-            SizedBox(height: 20),
-
+            const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
+              child: tasks.isEmpty
+                  ? const Center(
+                child: Text(
+                  'No Notes yet!',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              )
+                  : ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
                   final task = tasks[index];
-                  bool isCompleted = false;
+                  bool isCompleted = task['isComplete'] == 1;
                   return Card(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(13),
-                    ),
                     color: Colors.black12,
-                    margin: EdgeInsets.symmetric(vertical: 5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
                     child: ListTile(
                       leading: Checkbox(
                         value: isCompleted,
-                        onChanged: (value) {
-                          isCompleted = value!;
+                        onChanged: (value) async {
+                          await DB_Helper.updateTaskStatus(
+                            task['id'],
+                            value! ? 1 : 0,
+                          );
+                          loadTask();
                         },
                       ),
                       title: Text(
                         task['title'],
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: Colors.white,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
                       ),
                       subtitle: Text(
                         task['description'],
-                        style: TextStyle(color: Colors.grey),
+                        style: const TextStyle(color: Colors.grey),
                       ),
                       trailing: IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.delete, color: Colors.red),
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          await DB_Helper.deleteTask(task['id']);
+                          loadTask();
+                        },
                       ),
                     ),
                   );
@@ -184,11 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () => onTapAlertDialoge(),
-        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
