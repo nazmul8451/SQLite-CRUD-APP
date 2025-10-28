@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         checkboxTheme:CheckboxThemeData(
-          shape: const CircleBorder(), // ✅ Circle shape
+          shape: const CircleBorder(), //  Circle shape
       side: const BorderSide(color: Colors.purpleAccent),)
       ),
       debugShowCheckedModeBanner: false,

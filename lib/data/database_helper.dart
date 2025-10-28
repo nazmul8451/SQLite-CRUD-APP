@@ -47,13 +47,27 @@ class DB_Helper {
   }
 
   //  Update (for checkbox)
-  static Future<int> updateTaskStatus(int id, int isComplete) async {
+  static Future<int> checkTaskStatus(int id, int isComplete,) async {
     final db = await database;
     return await db.update(
       'task',
       {'isComplete': isComplete},
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  static Future<int>updateTask(int id,String newtitle,String newdescription)async{
+    final db = await database;
+    return await db.update(
+        'task',
+        {
+          'title':newtitle,
+          'description':newdescription,
+        },
+      where: 'id = ?',
+      whereArgs: [id],
+
     );
   }
 
