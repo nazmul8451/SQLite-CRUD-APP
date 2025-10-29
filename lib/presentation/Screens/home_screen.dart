@@ -248,13 +248,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Color(0xFF9f3f32),
                                 child: const Icon(Icons.delete, color: Colors.white),
                               ),
-                              onDismissed: (direction) async{
+                              onDismissed: (direction) async {
                                 await DB_Helper.deleteTask(task['id']);
                                 setState(() {
-                                  task.remove(index);
+                                  tasks.removeAt(index);
                                 });
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Task deleted')));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(content: Text('Task deleted')));
                               },
+
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 15,
